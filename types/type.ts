@@ -1,6 +1,6 @@
 export interface ChartDataItem {
   date: string;
-  price: number
+  price: number | null
 }
 
 export interface NewsArticle {

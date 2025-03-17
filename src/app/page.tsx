@@ -31,6 +31,23 @@ const chartData = [
   { date: "2024-06-12", price: 492 },
   { date: "2024-06-13", price: 81 },
   { date: "2024-06-14", price: 426 },
+  { date: "2024-06-15", price: null },
+  { date: "2024-06-16", price: null },
+  { date: "2024-06-17", price: null },
+  { date: "2024-06-18", price: null },
+  { date: "2024-06-19", price: null },
+  { date: "2024-06-20", price: null },
+  { date: "2024-06-21", price: null },
+  { date: "2024-06-22", price: null },
+  { date: "2024-06-23", price: null },
+  { date: "2024-06-24", price: null },
+  { date: "2024-06-25", price: null },
+  { date: "2024-06-26", price: null },
+  { date: "2024-06-27", price: null },
+
+];
+
+const elseChartData = [
   { date: "2024-06-15", price: 307 },
   { date: "2024-06-16", price: 371 },
   { date: "2024-06-17", price: 475 },
@@ -44,7 +61,7 @@ const chartData = [
   { date: "2024-06-25", price: 141 },
   { date: "2024-06-26", price: 434 },
   { date: "2024-06-27", price: 448 },
-];
+]
 
 const newsData:NewsArticle[] = [
   { date: "2024-03-01", title: "Apple Releases New iPhone", description: "Apple has unveiled its latest iPhone model with improved features and design.", url: "https://example.com/apple-releases-new-iphone" },
@@ -145,16 +162,16 @@ export default function Page() {
     {/* 예측 그래프 */}
     <div className="grid grid-cols-2 gap-4 h-full">
       <div className="">
-        <FinChart findata={chartData} name="LSTM Graph 1" style="LSTM" id={2}></FinChart>
+        <FinChart findata={elseChartData} name="LSTM Graph 1" style="LSTM" id={2}></FinChart>
       </div>
       <div className="">
-        <FinChart findata={chartData} name="LSTM Graph 2" style="LSTM" id={3}></FinChart>
+        <FinChart findata={elseChartData} name="LSTM Graph 2" style="LSTM" id={3}></FinChart>
       </div>
       <div className="">
-        <FinChart findata={chartData} name="LSTM Graph 3" style="LSTM" id={4}></FinChart>
+        <FinChart findata={elseChartData} name="LSTM Graph 3" style="LSTM" id={4}></FinChart>
       </div>
       <div className="">
-        <FinChart findata={chartData} name="ARIMA Graph" style="ARIMA" id={5}></FinChart>
+        <FinChart findata={elseChartData} name="ARIMA Graph" style="ARIMA" id={5}></FinChart>
       </div>
     </div>
   </div>

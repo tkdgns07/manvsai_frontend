@@ -143,6 +143,7 @@ const FinChart: React.FC<FinChartProps> = ({ findata, classname, name, descripti
               fill={`url(#fillData-${id})`}
               stroke={chartColor}
               stackId="a"
+              connectNulls={true}
             />
             {strikePrice !== undefined && (
               <ReferenceLine
