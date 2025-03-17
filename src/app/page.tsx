@@ -1,13 +1,13 @@
 "use client"
 
-import FinChart from "@/components/finance/FinChart"
-import { ChartDataItem, NewsArticle } from "../../types/type";
+import { FinChart, PredictFinChart } from "@/components/finance/FinChart"
+import { ChartDataItem, NewsArticle, ExtraDataSet, Configs } from "../../types/type";
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 
 import { useState } from "react";
 
-const chartData = [
+const mainData: ChartDataItem[] = [
   { date: "2024-05-23", price: 252 },
   { date: "2024-05-24", price: 294 },
   { date: "2024-05-25", price: 201 },
@@ -44,25 +44,70 @@ const chartData = [
   { date: "2024-06-25", price: null },
   { date: "2024-06-26", price: null },
   { date: "2024-06-27", price: null },
-
 ];
 
-const elseChartData = [
-  { date: "2024-06-15", price: 307 },
-  { date: "2024-06-16", price: 371 },
-  { date: "2024-06-17", price: 475 },
-  { date: "2024-06-18", price: 107 },
-  { date: "2024-06-19", price: 341 },
-  { date: "2024-06-20", price: 408 },
-  { date: "2024-06-21", price: 169 },
-  { date: "2024-06-22", price: 317 },
-  { date: "2024-06-23", price: 480 },
-  { date: "2024-06-24", price: 132 },
-  { date: "2024-06-25", price: 141 },
-  { date: "2024-06-26", price: 434 },
-  { date: "2024-06-27", price: 448 },
-]
-
+const extraDataSets: ExtraDataSet[] = [
+  {
+    label: "LSTM1",
+    style: "LSTM",
+    data: [
+      { date: "2024-06-14", price: 426 },
+      { date: "2024-06-15", price: 430 },
+      { date: "2024-06-16", price: 420 },
+      { date: "2024-06-17", price: 400 },
+      { date: "2024-06-18", price: 390 },
+      { date: "2024-06-19", price: 385 },
+      { date: "2024-06-20", price: 395 },
+      { date: "2024-06-21", price: 405 },
+      { date: "2024-06-22", price: 410 },
+      { date: "2024-06-23", price: 400 },
+      { date: "2024-06-24", price: 390 },
+      { date: "2024-06-25", price: 380 },
+      { date: "2024-06-26", price: 370 },
+      { date: "2024-06-27", price: 360 },
+    ],
+  },
+  {
+    label: "LSTM2",
+    style: "LSTM",
+    data: [
+      { date: "2024-06-14", price: 426 },
+      { date: "2024-06-15", price: 440 },
+      { date: "2024-06-16", price: 435 },
+      { date: "2024-06-17", price: 430 },
+      { date: "2024-06-18", price: 420 },
+      { date: "2024-06-19", price: 415 },
+      { date: "2024-06-20", price: 410 },
+      { date: "2024-06-21", price: 405 },
+      { date: "2024-06-22", price: 400 },
+      { date: "2024-06-23", price: 390 },
+      { date: "2024-06-24", price: 385 },
+      { date: "2024-06-25", price: 375 },
+      { date: "2024-06-26", price: 370 },
+      { date: "2024-06-27", price: 365 },
+    ],
+  },
+  {
+    label: "ARIMA",
+    style: "ARIMA",
+    data: [
+      { date: "2024-06-14", price: 426 },
+      { date: "2024-06-15", price: 450 },
+      { date: "2024-06-16", price: 440 },
+      { date: "2024-06-17", price: 430 },
+      { date: "2024-06-18", price: 420 },
+      { date: "2024-06-19", price: 415 },
+      { date: "2024-06-20", price: 410 },
+      { date: "2024-06-21", price: 405 },
+      { date: "2024-06-22", price: 400 },
+      { date: "2024-06-23", price: 390 },
+      { date: "2024-06-24", price: 380 },
+      { date: "2024-06-25", price: 370 },
+      { date: "2024-06-26", price: 360 },
+      { date: "2024-06-27", price: 350 },
+    ],
+  },
+];
 const newsData:NewsArticle[] = [
   { date: "2024-03-01", title: "Apple Releases New iPhone", description: "Apple has unveiled its latest iPhone model with improved features and design.", url: "https://example.com/apple-releases-new-iphone" },
   { date: "2024-03-02", title: "Apple's Q1 Earnings Report Surpasses Expectations", description: "Apple reported higher-than-expected earnings in the first quarter, with strong sales in its services division.", url: "https://example.com/apple-q1-earnings-report" },
@@ -76,7 +121,29 @@ const newsData:NewsArticle[] = [
   { date: "2024-03-10", title: "Apple Acquires Virtual Reality Startup", description: "Apple has acquired a virtual reality startup to strengthen its AR and VR product offerings for the future.", url: "https://example.com/apple-acquires-vr-startup" }
 ];
 
+const mainChartConfigs: Configs[] = [
+  {
+    label: "price",
+    color: "MainGood",
+    chartType: true
 
+  },
+  {
+    label: "LSTM1",
+    color: "LSTM",
+    chartType: false
+  },
+  {
+    label: "LSTM2",
+    color: "LSTM",
+    chartType: false
+  },
+  {
+    label: "ARIMA",
+    color: "MainGood",
+    chartType: false
+  },
+];
 
 export default function Page() {
   const [newsExpend, setNewsExpend] = useState(false);
@@ -100,7 +167,7 @@ export default function Page() {
       </Card>
 
     {/* 현재 주가 차트 (뉴스 포함) */}
-    <FinChart findata={chartData} name="Apple" classname="flex flex-col" strikePrice={340} style="MainGood" id={1}>
+    <FinChart findata={mainData} extradata={extraDataSets} name="Apple" classname="flex flex-col" strikePrice={340} configs={mainChartConfigs}>
       {/* 구분선 */}
       <div className="w-full h-[1px] bg-gray-400 rounded-full"></div>
 
@@ -133,7 +200,6 @@ export default function Page() {
           </button>
         </div>
       </div>
-
       <div className="relative inline-block">
       <div className={`h-[250px] mt-2 ${newsExpend ? "overflow-y-scroll" : "overflow-hidden"}`}>
         <div className="grid grid-cols-2 grid-rows-5 gap-2">
@@ -159,19 +225,18 @@ export default function Page() {
       </div>
     </FinChart>
 
-    {/* 예측 그래프 */}
     <div className="grid grid-cols-2 gap-4 h-full">
       <div className="">
-        <FinChart findata={elseChartData} name="LSTM Graph 1" style="LSTM" id={2}></FinChart>
+        <PredictFinChart findata={mainData} name="LSTM Graph 1" style="LSTM" id={2}></PredictFinChart>
       </div>
       <div className="">
-        <FinChart findata={elseChartData} name="LSTM Graph 2" style="LSTM" id={3}></FinChart>
+        <PredictFinChart findata={mainData} name="LSTM Graph 2" style="LSTM" id={3}></PredictFinChart>
       </div>
       <div className="">
-        <FinChart findata={elseChartData} name="LSTM Graph 3" style="LSTM" id={4}></FinChart>
+        <PredictFinChart findata={mainData} name="LSTM Graph 3" style="LSTM" id={4}></PredictFinChart>
       </div>
       <div className="">
-        <FinChart findata={elseChartData} name="ARIMA Graph" style="ARIMA" id={5}></FinChart>
+        <PredictFinChart findata={mainData} name="ARIMA Graph" style="ARIMA" id={5}></PredictFinChart>
       </div>
     </div>
   </div>
