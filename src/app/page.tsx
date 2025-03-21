@@ -1,113 +1,15 @@
 "use client"
 
 import { FinChart, PredictFinChart } from "@/components/finance/FinChart"
-import { ChartDataItem, NewsArticle, ExtraDataSet, Configs } from "../../types/type";
+import { NewsArticle, RawData, TransformedData } from "../../types/type";
+import axios from "axios"
+import SaleSection from "@/components/finance/BlackScholes"
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const mainData: ChartDataItem[] = [
-  { date: "2024-05-23", price: 252 },
-  { date: "2024-05-24", price: 294 },
-  { date: "2024-05-25", price: 201 },
-  { date: "2024-05-26", price: 213 },
-  { date: "2024-05-27", price: 420 },
-  { date: "2024-05-28", price: 233 },
-  { date: "2024-05-29", price: 78 },
-  { date: "2024-05-30", price: 340 },
-  { date: "2024-05-31", price: 178 },
-  { date: "2024-06-01", price: 178 },
-  { date: "2024-06-02", price: 470 },
-  { date: "2024-06-03", price: 103 },
-  { date: "2024-06-04", price: 439 },
-  { date: "2024-06-05", price: 88 },
-  { date: "2024-06-06", price: 294 },
-  { date: "2024-06-07", price: 323 },
-  { date: "2024-06-08", price: 385 },
-  { date: "2024-06-09", price: 438 },
-  { date: "2024-06-10", price: 155 },
-  { date: "2024-06-11", price: 92 },
-  { date: "2024-06-12", price: 492 },
-  { date: "2024-06-13", price: 81 },
-  { date: "2024-06-14", price: 426 },
-  { date: "2024-06-15", price: null },
-  { date: "2024-06-16", price: null },
-  { date: "2024-06-17", price: null },
-  { date: "2024-06-18", price: null },
-  { date: "2024-06-19", price: null },
-  { date: "2024-06-20", price: null },
-  { date: "2024-06-21", price: null },
-  { date: "2024-06-22", price: null },
-  { date: "2024-06-23", price: null },
-  { date: "2024-06-24", price: null },
-  { date: "2024-06-25", price: null },
-  { date: "2024-06-26", price: null },
-  { date: "2024-06-27", price: null },
-];
 
-const extraDataSets: ExtraDataSet[] = [
-  {
-    label: "LSTM1",
-    style: "LSTM",
-    data: [
-      { date: "2024-06-14", price: 426 },
-      { date: "2024-06-15", price: 430 },
-      { date: "2024-06-16", price: 420 },
-      { date: "2024-06-17", price: 400 },
-      { date: "2024-06-18", price: 390 },
-      { date: "2024-06-19", price: 385 },
-      { date: "2024-06-20", price: 395 },
-      { date: "2024-06-21", price: 405 },
-      { date: "2024-06-22", price: 410 },
-      { date: "2024-06-23", price: 400 },
-      { date: "2024-06-24", price: 390 },
-      { date: "2024-06-25", price: 380 },
-      { date: "2024-06-26", price: 370 },
-      { date: "2024-06-27", price: 360 },
-    ],
-  },
-  {
-    label: "LSTM2",
-    style: "LSTM",
-    data: [
-      { date: "2024-06-14", price: 426 },
-      { date: "2024-06-15", price: 440 },
-      { date: "2024-06-16", price: 435 },
-      { date: "2024-06-17", price: 430 },
-      { date: "2024-06-18", price: 420 },
-      { date: "2024-06-19", price: 415 },
-      { date: "2024-06-20", price: 410 },
-      { date: "2024-06-21", price: 405 },
-      { date: "2024-06-22", price: 400 },
-      { date: "2024-06-23", price: 390 },
-      { date: "2024-06-24", price: 385 },
-      { date: "2024-06-25", price: 375 },
-      { date: "2024-06-26", price: 370 },
-      { date: "2024-06-27", price: 365 },
-    ],
-  },
-  {
-    label: "ARIMA",
-    style: "ARIMA",
-    data: [
-      { date: "2024-06-14", price: 426 },
-      { date: "2024-06-15", price: 450 },
-      { date: "2024-06-16", price: 440 },
-      { date: "2024-06-17", price: 430 },
-      { date: "2024-06-18", price: 420 },
-      { date: "2024-06-19", price: 415 },
-      { date: "2024-06-20", price: 410 },
-      { date: "2024-06-21", price: 405 },
-      { date: "2024-06-22", price: 400 },
-      { date: "2024-06-23", price: 390 },
-      { date: "2024-06-24", price: 380 },
-      { date: "2024-06-25", price: 370 },
-      { date: "2024-06-26", price: 360 },
-      { date: "2024-06-27", price: 350 },
-    ],
-  },
-];
 const newsData:NewsArticle[] = [
   { date: "2024-03-01", title: "Apple Releases New iPhone", description: "Apple has unveiled its latest iPhone model with improved features and design.", url: "https://example.com/apple-releases-new-iphone" },
   { date: "2024-03-02", title: "Apple's Q1 Earnings Report Surpasses Expectations", description: "Apple reported higher-than-expected earnings in the first quarter, with strong sales in its services division.", url: "https://example.com/apple-q1-earnings-report" },
@@ -121,126 +23,190 @@ const newsData:NewsArticle[] = [
   { date: "2024-03-10", title: "Apple Acquires Virtual Reality Startup", description: "Apple has acquired a virtual reality startup to strengthen its AR and VR product offerings for the future.", url: "https://example.com/apple-acquires-vr-startup" }
 ];
 
-const mainChartConfigs: Configs[] = [
-  {
-    label: "price",
-    color: "MainGood",
-    chartType: true
-
-  },
-  {
-    label: "LSTM1",
-    color: "LSTM",
-    chartType: false
-  },
-  {
-    label: "LSTM2",
-    color: "LSTM",
-    chartType: false
-  },
-  {
-    label: "ARIMA",
-    color: "MainGood",
-    chartType: false
-  },
-];
-
 export default function Page() {
+  const [fund, setFund] = useState<number>(1000)
   const [newsExpend, setNewsExpend] = useState(false);
+  const [rawData, setRawData] = useState<RawData[]>([])
+  const [lastStock, setLastStock] = useState(0)
+  const [strikePrice, setStrikePrice] = useState<number | null>(null)
+  const [chartStyle, setChartStyle] = useState<[1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0]>([1, 0, 0, 0, 0, 0])
+  const [page, setPage] = useState<number>(0)
+  const [option, setOption] = useState<number>(0)
 
-  return (
-    <main className="p-3 h-screen">
-  <div className="grid grid-cols-2 auto-rows-auto h-full gap-4">
-    {/* 현재 시장 */}
-      <Card className="flex w-full h-[100px]">
-        <CardHeader>
-          <CardTitle className="font-bold text-lg">현재 시장</CardTitle>
-          <CardDescription>Apple의 특정 기간 실제 주식 시장입니다</CardDescription>
-        </CardHeader>
-      </Card>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/extract_csv_data/", {
+          params: {
+            ticker: "AAPL",
+            page: 0
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        setRawData(response.data.data)
+        setLastStock(response.data.lastStock)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetchData()
+  }, [])
 
-      <Card className="flex w-full h-[100px]">
-        <CardHeader>
-          <CardTitle className="font-bold text-lg">예측 시장</CardTitle>
-          <CardDescription>LSTM과 ARIMA 모델로 현재 시간에서 다음 1년의 주식 시장을 예측한 모습입니다.</CardDescription>
-        </CardHeader>
-      </Card>
+  const [latestChartStyle, setLatestChartStyle] = useState(chartStyle);
 
-    {/* 현재 주가 차트 (뉴스 포함) */}
-    <FinChart findata={mainData} extradata={extraDataSets} name="Apple" classname="flex flex-col" strikePrice={340} configs={mainChartConfigs}>
-      {/* 구분선 */}
-      <div className="w-full h-[1px] bg-gray-400 rounded-full"></div>
+const toggleChartStyle = (index: number) => {
+  setChartStyle(prevChartStyle => {
+    const newChartStyle: [1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0] = [...prevChartStyle];
+    newChartStyle[index] = newChartStyle[index] === 0 ? 1 : 0;
+    return newChartStyle;
+  });
+};
 
-      {/* 행사가격 정보 */}
-      <div className="w-full flex items-end mt-2 flex-col">
-        <p className="text-xs">행사가격</p>
-        <p className="text-lg font-bold">33.23$</p>
-      </div>
+// chartStyle이 변경될 때 최신 상태 반영
+useEffect(() => {
+  setLatestChartStyle(chartStyle);
+}, [chartStyle]);
 
-      {/* Call & Put 버튼 */}
-      <div className="mt-2 flex justify-evenly">
-        <div className="w-1/2 p-1">
-          <button className="flex justify-evenly items-center w-full h-full bg-green-500 rounded-lg p-4 cursor-pointer hover:brightness-90 duration-200">
-            <p className="text-lg font-bold">Call</p>
-            <span className="w-[1px] h-full bg-gray-200"></span>
-            <div>
-              <p className="font-bold text-gray-200 text-sm">Premium</p>
-              <p className="text-gray-200 text-xs">5.01$</p>
-            </div>
-          </button>
+  const [saleLoader, setSaleLoader] = useState<boolean>(false)
+  const handleOption = (option : number) => {
+    setOption(option)
+    setSaleLoader(true)
+    console.log('no')
+  }
+
+  const handlePurchase = async () => {
+    setPage(prev => {
+      const newPage = prev + 1
+      return newPage
+    })
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/extract_csv_data/", {
+        params: {
+          ticker: "AAPL",
+          page: page + 1
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setLastStock(response.data.lastStock)
+
+      setChartStyle([0, 0, 0, 0, 0, 0])
+      const strike = strikePrice ?? 0;
+      if (option < 0) {
+        if ((strike + option) * -1 < response.data.lastStock) {
+          toggleChartStyle(0)
+        }else {
+          toggleChartStyle(1)
+        }
+        setFund(prev => {
+          const newFund = prev + response.data.lastStock - strike - option
+          return Number(newFund.toFixed(2))
+        })
+      } else if (option > 0) {
+        if (strike > (response.data.lastStock + option)) {
+          toggleChartStyle(0)
+        }else {
+          toggleChartStyle(1)
+        }
+        setFund(prev => {
+          const newFund = prev - response.data.lastStock + strike - option
+          return Number(newFund.toFixed(2))
+        })
+      }
+      setRawData(response.data.data)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setSaleLoader(false)
+    }
+  }
+
+  const handleRechoice = () => {
+    setOption(0)
+    setSaleLoader(false)
+  }
+
+
+  if (rawData.length > 0){
+    return (
+      <>
+      <div className={`w-full h-full fixed flex justify-center items-center backdrop-brightness-50 z-10 ${!saleLoader ? 'hidden' : undefined}`}>
+          <div className="bg-white p-5 rounded">
+            <p className="text-xl text-black font-bold">정말 {option > 0 ? "Put Option" : "Call Option"}을 {Math.abs(option)}$로 구매하시겠습니까?</p>
+            <p className="text-sm text-gray-500 mt-[10px] my-[20px]">옵션의 가격은 Premium 값과 행사가격을 합한 값입니다.</p>
+            <button className="w-full flex justify-center py-3 text-lg text-white bg-black font-bold rounded cursor-pointer"
+              onClick={handlePurchase}
+            >Purchase</button>
+            <button className="w-full flex justify-center py-3 text-lg text-black font-bold rounded cursor-pointer"
+              onClick={handleRechoice}
+            >Rechoice</button>
+          </div>
         </div>
-        <div className="w-1/2 p-1">
-          <button className="flex justify-evenly items-center w-full h-full bg-red-500 rounded-lg p-4 cursor-pointer hover:brightness-90 duration-200">
-            <p className="text-lg font-bold">Put</p>
-            <span className="w-[1px] h-full bg-gray-200"></span>
-            <div>
-              <p className="font-bold text-gray-200 text-sm">Premium</p>
-              <p className="text-gray-200 text-xs">2.31$</p>
-            </div>
-          </button>
-        </div>
-      </div>
-      <div className="relative inline-block">
-      <div className={`h-[250px] mt-2 ${newsExpend ? "overflow-y-scroll" : "overflow-hidden"}`}>
-        <div className="grid grid-cols-2 grid-rows-5 gap-2">
-          {newsData.map((item, index) => (
-            <a href={item.url} key={index} >
-              <div className="p-2">
-                <p className="font-semibold">{item.title}</p>
-                <p className="text-sm text-gray-600">{item.description}</p>
-                <p className="text-xs text-gray-400">{item.date}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-      <button
-        onClick={()=>setNewsExpend(true)}
-        className="cursor-pointer"
-      >
-        <div className={`gradient-background absolute bottom-5 w-full h-[100px] flex items-center justify-center ${newsExpend ? "hidden" : ""}`}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"/></svg>
-        </div>
-      </button>
-      </div>
-    </FinChart>
-
-    <div className="grid grid-cols-2 gap-4 h-full">
-      <div className="">
-        <PredictFinChart findata={mainData} name="LSTM Graph 1" style="LSTM" id={2}></PredictFinChart>
-      </div>
-      <div className="">
-        <PredictFinChart findata={mainData} name="LSTM Graph 2" style="LSTM" id={3}></PredictFinChart>
-      </div>
-      <div className="">
-        <PredictFinChart findata={mainData} name="LSTM Graph 3" style="LSTM" id={4}></PredictFinChart>
-      </div>
-      <div className="">
-        <PredictFinChart findata={mainData} name="ARIMA Graph" style="ARIMA" id={5}></PredictFinChart>
-      </div>
+      <main className="p-3 w-full h-full">
+        
+    <div className="grid grid-cols-2 grid-rows-[100px_auto] h-full gap-4">
+        <Card className="flex w-full h-[100px]">
+          <CardHeader>
+            <CardTitle className="font-bold text-lg">현재 시장</CardTitle>
+            <CardDescription>Apple의 특정 기간 실제 주식 시장입니다</CardDescription>
+          </CardHeader>
+        </Card>
+  
+        <Card className="flex w-full h-[100px]">
+          <CardHeader>
+            <CardTitle className="font-bold text-lg">예측 시장</CardTitle>
+            <CardDescription>LSTM과 ARIMA 모델로 현재 시간에서 다음 1년의 주식 시장을 예측한 모습입니다.</CardDescription>
+          </CardHeader>
+        </Card>
+  
+      <FinChart rawData={rawData} name="APPL" curruntFund={fund} strikePrice={strikePrice} chartStyle={chartStyle}>
+        <SaleSection stockPrice={lastStock} onStrikePriceChange={setStrikePrice} onPageChange={handleOption}></SaleSection>
+        <div className="relative inline-block w-full mt-[10px]">
+      <div className={`h-[270px] w-full mt-2 flex-1 overflow-y-auto`}>
+    <div className="h-[300px] grid grid-cols-2 gap-2">
+      {newsData.map((item, index) => (
+        <a href={item.url} key={index}>
+          <div className="p-2">
+            <p className="font-semibold">{item.title}</p>
+            <p className="text-sm text-gray-600">{item.description}</p>
+            <p className="text-xs text-gray-400">{item.date}</p>
+          </div>
+        </a>
+      ))}
     </div>
   </div>
-</main>
-
-  )
+        <button
+          onClick={()=>setNewsExpend(true)}
+          className="cursor-pointer"
+        >
+          <div className={`gradient-background absolute bottom-5 w-full h-[100px] flex items-center justify-center ${newsExpend ? "hidden" : ""}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"/></svg>
+          </div>
+        </button>
+        </div>
+      </FinChart>
+      <div className="grid grid-cols-2 gap-4 h-full">
+        <div className="">
+          <PredictFinChart findata={rawData[1]['data']} name="LSTM Graph 1" style="LSTM" id='LSTM1' trigger={()=>toggleChartStyle(2)}></PredictFinChart>
+        </div>
+        <div className="">
+          <PredictFinChart findata={rawData[2]['data']} name="LSTM Graph 2" style="LSTM" id='LSTM2' trigger={()=>toggleChartStyle(3)}></PredictFinChart>
+        </div>
+        <div className="">
+          <PredictFinChart findata={rawData[3]['data']} name="LSTM Graph 3" style="LSTM" id='LSTM3' trigger={()=>toggleChartStyle(4)}></PredictFinChart>
+        </div>
+        <div className="">
+          <PredictFinChart findata={rawData[4]['data']} name="ARIMA Graph" style="ARIMA" id='ARIMA' trigger={()=>toggleChartStyle(5)}></PredictFinChart>
+        </div>
+      </div>
+    </div>
+  </main>
+  </>
+  
+    )
+  
+  }
 }

@@ -5,8 +5,9 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from "rec
 import React from "react";
 import { ReactNode } from 'react';
 import { useState, useEffect } from "react";
-import { ChartDataItem, NewsArticle, ExtraDataSet, FinalData, Configs } from "../../../types/type";
-import { mergeChartData } from "@/lib/utils/mergeChartData"
+import { RawData, FinalData, Configs, ChartItem, ChartDataItem } from "../../../types/type";
+import mergeChartData from "@/lib/utils/mergeChartData"
+import { mainChartConfigs } from "@/constants/chartConfigs"
 
 import {
   Card,
@@ -26,76 +27,49 @@ import {
 } from "@/components/ui/chart";
 
 interface FinChartProps {
-  findata: ChartDataItem[];
-  extradata?: ExtraDataSet[]
-  classname?: string;
+  rawData: RawData[]
   name: string;
-  description?: string;
   children? : ReactNode
-  strikePrice? : number;
-  configs: Configs[]
-}
-
-function StyleSorter (style : string) {
-  switch (style) {
-    case "MainBad" :
-      return ("var(--chart-red)")
-    case "MainGood" :
-      return ("var(--chart-green)")
-    case "LSTM" :
-      return ("var(--chart-LSTM)")
-    case "ARIMA" :
-      return ("var(--chart-ARIMA)")
-    default:
-      return ("var(--chart-default)");
-  }
+  strikePrice? : number | null;
+  chartStyle: [1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0]
+  curruntFund: number
 }
 
 const chartconfig = {} satisfies ChartConfig
 
-const FinChart: React.FC<FinChartProps> = ({ findata, extradata, classname, name, description, children, strikePrice, configs }) => {
+const FinChart: React.FC<FinChartProps> = ({ rawData, name, children, strikePrice, chartStyle, curruntFund }) => {
   const [mergedData, setMergedData] = useState<FinalData[]>([])
-  const [chartConfig, setChartConfig] = useState<Configs[]>([]);
-  const [yAxisDomain, setYAxisDomain] = useState<[number, number]>([0, 500]);  // Y축 범위 기본값 설정
+  const [chartConfig] = useState<Configs[]>(mainChartConfigs);
 
   useEffect(() => {
-    if (extradata) {
-      const merging = mergeChartData(findata, extradata);
-      setMergedData(merging);
-      console.log(mergedData)
-    } else {
-      const findataAsFinalData: FinalData[] = findata.map((item) => ({
-        date: item.date,
-        price: item.price,
-      }));
-      setMergedData(findataAsFinalData);
-      console.log(mergedData)
-    }
-
-    const prices = mergedData.flatMap(item => [
-      item.price, 
-      ...(Array.isArray(item?.data) ? item?.data.map(d => d.price) : [])
-    ]);
-    const minPrice = Math.min(...prices.filter(price => price !== null));
-    const maxPrice = Math.max(...prices.filter(price => price !== null));
-
-    // Y축 범위를 최소값과 최대값에 맞게 설정
-    setYAxisDomain([minPrice - 10, maxPrice + 10]);
-  }, [findata, extradata]);
+    const mergeddata = mergeChartData(rawData)
+    setMergedData(mergeddata)
+    console.log(rawData)
+    console.log(mergedData)
+  }, [rawData]);
 
   useEffect(() => {
-    setChartConfig(configs.map((config) => ({
-      ...config,
-      color: StyleSorter(config.color),
-    })));
-  }, [configs])
+    chartConfig.forEach((config, index) => {
+      if (chartStyle[index] === 1) {
+        config.chartType = true;
+      } else {
+        config.chartType = false;
+      }
+    });
+  }, [chartStyle])
 
   return (
-    <Card className={`w-full h-full ${classname}`}>
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="flex flex-row justify-between items-center">
         <div>
           <CardTitle>{name}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+        </div>
+        <div className="flex items-center">
+          <div className="flex mr-[6px]">
+            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] ${chartStyle[0] ? 'border-b-red-500' : 'border-b-gray-300'}`}></div>
+            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[12px] ${chartStyle[1] ? 'border-t-green-500' : 'border-t-gray-300'}`}></div>
+          </div>
+          <p className="font-bold text-lg">{curruntFund}$</p>
         </div>
       </CardHeader>
       <CardContent className="h-full">
@@ -106,20 +80,22 @@ const FinChart: React.FC<FinChartProps> = ({ findata, extradata, classname, name
           <AreaChart data={mergedData} className="relative">
             <defs>
               {chartConfig?.map((item) => {
-                return (
-                  <linearGradient key={item.label} id={item.label} x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor={item.color}
-                      stopOpacity={item.chartType ? 1 : 0}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor={item.color}
-                      stopOpacity={item.chartType ? 0.3 : 0}
-                    />
-                  </linearGradient>
-                )
+                if (item.chartType) {
+                  return (
+                    <linearGradient key={item.label} id={item.label} x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="5%"
+                        stopColor={item.color}
+                        stopOpacity={(item.id === "MainGood" || item.id === "MainBad") ? 0.8 : 0}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor={item.color}
+                        stopOpacity={(item.id === "MainGood" || item.id === "MainBad") ? 0.1 : 0}
+                      />
+                    </linearGradient>
+                  )  
+                }
               })}
             </defs>
             <CartesianGrid vertical={false} />
@@ -139,9 +115,11 @@ const FinChart: React.FC<FinChartProps> = ({ findata, extradata, classname, name
               }}
             />
             <YAxis
-              domain={yAxisDomain}  // Y축의 범위를 자동으로 설정
-              tickLine={false}
+              tickFormatter={(value) => `$${value.toFixed(2)}`}  // Y축 값에 $ 단위 추가
               axisLine={false}
+              tickLine={false}
+              tickMargin={10}
+              interval="preserveStartEnd"  // Y축 간격을 적절히 맞추기 위한 설정
             />
             <ChartTooltip
               cursor={false}
@@ -158,20 +136,21 @@ const FinChart: React.FC<FinChartProps> = ({ findata, extradata, classname, name
               }
             />
             {chartConfig.map((item) => {
-              return (
-                <Area
-                  dataKey={item.label}
-                  type="natural"
-                  fill={`url(#${item.label})`}
-                  stroke={item.color}
-                  strokeWidth={2}
-                  stackId={item.label}
-                  connectNulls={true}
-                  key={item.label}
-                />
-              )
+              if (item.chartType) {
+                return (
+                  <Area
+                    dataKey={item.label}
+                    type="natural"
+                    fill={`url(#${item.label})`}
+                    stroke={item.color}
+                    strokeWidth={2}
+                    stackId={item.label}
+                    connectNulls={true}
+                    key={item.label}
+                  />
+              )}
             })}
-            {strikePrice !== undefined && (
+            {strikePrice !== null && (
               <ReferenceLine
                 y={strikePrice}
                 stroke="black"
@@ -200,10 +179,11 @@ interface elseFinChartProps {
   description?: string;
   strikePrice? : number;
   style : "LSTM" | "ARIMA"
-  id: number;
+  id: string;
+  trigger: () => void;
 }
 
-const PredictFinChart: React.FC<elseFinChartProps> = ({ findata, classname, name, description, strikePrice, style, id }) => {
+const PredictFinChart: React.FC<elseFinChartProps> = ({ findata, classname, name, description, strikePrice, style, id, trigger }) => {
   const [chartColor, setChartColor] = useState("")
 
   useEffect(() => {
@@ -222,7 +202,7 @@ const PredictFinChart: React.FC<elseFinChartProps> = ({ findata, classname, name
 
   if (!chartColor) {
     return null;
-  }
+  }  
 
   return (
     <Card className={`w-full h-full ${classname}`}>
@@ -232,7 +212,10 @@ const PredictFinChart: React.FC<elseFinChartProps> = ({ findata, classname, name
           <CardDescription>{description}</CardDescription>
         </div>
         {style == "LSTM" || style == "ARIMA" ? (
-            <button className="rounded px-2 py-1 bg-black text-white font-bold text-sm">그래프에 추가</button>
+            <button
+              className="rounded px-2 py-1 bg-black text-white font-bold text-sm"
+              onClick={trigger}
+            >그래프에 추가</button>
           ) : (
             undefined
           )
@@ -296,20 +279,6 @@ const PredictFinChart: React.FC<elseFinChartProps> = ({ findata, classname, name
               stackId="a"
               connectNulls={true}
             />
-            {strikePrice !== undefined && (
-              <ReferenceLine
-                y={strikePrice}
-                stroke="black"
-                strokeDasharray="5 5"
-                label={{
-                  value: `행사가격: ${strikePrice}$`,
-                  position: "top",
-                  fill: "black",
-                  fontSize: 12,
-                  fontWeight: "bold",
-                }}
-              />
-            )}
           </AreaChart>
         </ChartContainer>
       </CardContent>

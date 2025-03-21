@@ -1,12 +1,20 @@
 export interface ChartDataItem {
   date: string;
-  price: number | null
+  price: number
 }
 
-export interface ExtraDataSet {
+export interface RawData {
   label: string;
-  style: string;
   data: ChartDataItem[];
+}
+
+export interface ChartItem {
+  date: string;
+  label: number | null;
+}
+
+export interface TransformedData {
+  [key: string]: ChartItem[];
 }
 
 export interface FinalData {
@@ -15,6 +23,7 @@ export interface FinalData {
 }
 
 export interface Configs {
+  id: string;
   label : string;
   color : string;
   chartType : boolean

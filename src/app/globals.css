@@ -116,6 +116,7 @@
   }
   body {
     background-color: #f7faff;
+    height: 100vh;
   }
   .gradient-background {
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
