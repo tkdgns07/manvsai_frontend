@@ -35,3 +35,9 @@ export interface NewsArticle {
   date: string; // 뉴스가 작성된 날짜
   url: string;
 }
+
+export interface Company {
+  symbol: string
+  name: string
+  logoId: string
+}

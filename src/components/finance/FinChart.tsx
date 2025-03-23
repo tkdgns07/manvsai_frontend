@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { RawData, FinalData, Configs, ChartItem, ChartDataItem } from "../../../types/type";
 import mergeChartData from "@/lib/utils/mergeChartData"
 import { mainChartConfigs } from "@/constants/chartConfigs"
+import { Company } from "../../../types/type";
 
 import {
   Card,
@@ -28,24 +29,27 @@ import {
 
 interface FinChartProps {
   rawData: RawData[]
-  name: string;
   children? : ReactNode
   strikePrice? : number | null;
   chartStyle: [1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0, 1 | 0]
   curruntFund: number
+  changeOfStock : {
+    percentage : number;
+    change : number;
+  };
+  lastStock : number
+  company: Company;
 }
 
 const chartconfig = {} satisfies ChartConfig
 
-const FinChart: React.FC<FinChartProps> = ({ rawData, name, children, strikePrice, chartStyle, curruntFund }) => {
+const FinChart: React.FC<FinChartProps> = ({ rawData, children, strikePrice, chartStyle, curruntFund, lastStock, changeOfStock, company }) => {
   const [mergedData, setMergedData] = useState<FinalData[]>([])
   const [chartConfig] = useState<Configs[]>(mainChartConfigs);
 
   useEffect(() => {
     const mergeddata = mergeChartData(rawData)
     setMergedData(mergeddata)
-    console.log(rawData)
-    console.log(mergedData)
   }, [rawData]);
 
   useEffect(() => {
@@ -58,18 +62,27 @@ const FinChart: React.FC<FinChartProps> = ({ rawData, name, children, strikePric
     });
   }, [chartStyle])
 
+  if (!company) return
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader className="flex flex-row justify-between items-center">
         <div>
-          <CardTitle>{name}</CardTitle>
+          <p className="text-xs font-bold">{company.symbol}</p>
+          <div className="flex items-end">
+            <p className="text-3xl font-bold">{lastStock}</p>
+            <p className="ml-[5px] text-gray-500 text-xs">USD</p>
+          </div>
+          <div className={`${chartStyle[0] ? "text-red-500" : "text-green-500"} flex items-center`}>
+            <p className="font-semibold">{chartStyle[0] ? "+" : ""}{changeOfStock.change}$</p>
+            <p className="text-xs ml-[5px]">{Math.abs(changeOfStock.percentage)}%</p>
+          </div>
         </div>
         <div className="flex items-center">
           <div className="flex mr-[6px]">
-            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] ${chartStyle[0] ? 'border-b-red-500' : 'border-b-gray-300'}`}></div>
-            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[12px] ${chartStyle[1] ? 'border-t-green-500' : 'border-t-gray-300'}`}></div>
+            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] ${curruntFund >= 0 ? 'border-b-red-500' : 'border-b-gray-300'}`}></div>
+            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[12px] ${curruntFund < 0 ? 'border-t-green-500' : 'border-t-gray-300'}`}></div>
           </div>
-          <p className="font-bold text-lg">{curruntFund}$</p>
+          <p className="font-bold text-lg">{Math.abs(curruntFund)}$</p>
         </div>
       </CardHeader>
       <CardContent className="h-full">
@@ -115,11 +128,11 @@ const FinChart: React.FC<FinChartProps> = ({ rawData, name, children, strikePric
               }}
             />
             <YAxis
-              tickFormatter={(value) => `$${value.toFixed(2)}`}  // Y축 값에 $ 단위 추가
+              tickFormatter={(value) => `$${value.toFixed(2)}`}
               axisLine={false}
               tickLine={false}
               tickMargin={10}
-              interval="preserveStartEnd"  // Y축 간격을 적절히 맞추기 위한 설정
+              interval="preserveStartEnd"
             />
             <ChartTooltip
               cursor={false}
