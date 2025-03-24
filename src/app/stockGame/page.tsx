@@ -9,25 +9,13 @@ import { companies } from "@/constants/companies";
 import { Company } from "../../../types/type";
 import { OptionsGameManual } from "@/components/other/OptionsGameManual";
 import { useRouter } from "next/navigation";
+import { NewsCrawling } from "@/components/finance/newsCrawling"
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 
 import { useEffect, useState } from "react";
 
-const MainPage = () => {
-  const newsData:NewsArticle[] = [
-    { date: "2024-03-01", title: "Apple Releases New iPhone", description: "Apple has unveiled its latest iPhone model with improved features and design.", url: "https://example.com/apple-releases-new-iphone" },
-    { date: "2024-03-02", title: "Apple's Q1 Earnings Report Surpasses Expectations", description: "Apple reported higher-than-expected earnings in the first quarter, with strong sales in its services division.", url: "https://example.com/apple-q1-earnings-report" },
-    { date: "2024-03-03", title: "Apple Unveils AR Glasses", description: "Apple introduces its long-awaited augmented reality glasses, promising a new level of interaction with digital content.", url: "https://example.com/apple-unveils-ar-glasses" },
-    { date: "2024-03-04", title: "Apple Expands Apple Music in Asia", description: "Apple Music has expanded its presence in several Asian countries, offering a wide range of localized music.", url: "https://example.com/apple-expands-music-asia" },
-    { date: "2024-03-05", title: "Apple to Launch New Subscription Service", description: "Apple is set to launch a new subscription service aimed at delivering exclusive content to its customers.", url: "https://example.com/apple-launches-subscription-service" },
-    { date: "2024-03-06", title: "Apple Partners with Tesla for EV Technology", description: "Apple enters into a strategic partnership with Tesla to develop cutting-edge technology for electric vehicles.", url: "https://example.com/apple-partners-tesla-ev-tech" },
-    { date: "2024-03-07", title: "Apple to Open New Data Centers in Europe", description: "Apple announces the opening of several new data centers across Europe to improve cloud services and data privacy.", url: "https://example.com/apple-new-data-centers-europe" },
-    { date: "2024-03-08", title: "Apple's Environmental Initiative Takes a Step Forward", description: "Apple takes significant steps towards reducing its carbon footprint with a series of new environmental policies.", url: "https://example.com/apple-environmental-initiative" },
-    { date: "2024-03-09", title: "Apple Introduces New Privacy Features in iOS", description: "Apple enhances user privacy with new features aimed at protecting personal data from third-party access.", url: "https://example.com/apple-new-privacy-features-ios" },
-    { date: "2024-03-10", title: "Apple Acquires Virtual Reality Startup", description: "Apple has acquired a virtual reality startup to strengthen its AR and VR product offerings for the future.", url: "https://example.com/apple-acquires-vr-startup" }
-  ];
-  
+const MainPage = () => {  
   const [fund, setFund] = useState<number>(1000)
   const [newsExpend, setNewsExpend] = useState(false);
   const [rawData, setRawData] = useState<RawData[]>([])
@@ -169,14 +157,10 @@ useEffect(() => {
   useEffect(() => {
     if (fund - 1000 >= 50) {
       router.push(`gameClear?time=${time}&result=success`)
-    }
-  }, [page])
-
-  useEffect(() => {
-    if (page >= 9) {
+    } else if (page >= 9) {
       router.push(`gameClear?time=${time}&result=fail`)
     }
-  }, [page]);
+  }, [page])
 
   if (rawData.length > 0 && company){  
     return (
@@ -204,7 +188,7 @@ useEffect(() => {
             <p>{time}초 지남</p>
           </CardHeader>
         </Card>
-  
+
         <Card className="flex w-full h-[100px]">
           <CardHeader>
             <CardTitle className="font-bold text-lg">예측 시장</CardTitle>
@@ -214,21 +198,7 @@ useEffect(() => {
   
       <FinChart rawData={rawData} curruntFund={fund} strikePrice={strikePrice} chartStyle={chartStyle} lastStock={lastStock} changeOfStock={changeOfStock} company={company}>
         <SaleSection stockPrice={lastStock} onStrikePriceChange={setStrikePrice} onPageChange={handleOption}></SaleSection>
-        <div className="relative inline-block w-full mt-[10px] h-[270px]">
-      <div className={`max-h-[390px] w-full mt-2 flex-1 overflow-y-auto`}>
-    <div className="h-full grid grid-cols-2 gap-2">
-      {newsData.map((item, index) => (
-        <a href={item.url} key={index}>
-          <div className="p-2">
-            <p className="font-semibold">{item.title}</p>
-            <p className="text-sm text-gray-600">{item.description}</p>
-            <p className="text-xs text-gray-400">{item.date}</p>
-          </div>
-        </a>
-      ))}
-    </div>
-  </div>
-        </div>
+        <NewsCrawling symbol={company.symbol} page={page}></NewsCrawling>
       </FinChart>
         <div className="grid grid-cols-2 gap-4 h-full">
           <div className="">
